@@ -1,7 +1,6 @@
 package com.milikovv.linguacontext.accessibility
 
 import android.accessibilityservice.AccessibilityService
-import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Bitmap
 import android.util.Log

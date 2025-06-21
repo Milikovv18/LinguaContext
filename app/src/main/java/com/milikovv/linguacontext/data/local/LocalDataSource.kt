@@ -8,7 +8,7 @@ class MemoryLocalDataSource<T> @Inject constructor() : LocalDataSource<T> {
     private var data: T? = null
 
     override suspend fun set(data: T) {
-        this.data = data;
+        this.data = data
     }
 
     override suspend fun get(): T? {

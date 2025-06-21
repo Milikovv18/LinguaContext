@@ -28,7 +28,6 @@ import com.milikovv.linguacontext.data.repo.IDetailDataItem
 import com.milikovv.linguacontext.data.repo.WordDetail
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 
