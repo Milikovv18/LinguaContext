@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">LinguaContext</string>
+    <string name="app_name">Lingua Context</string>
+    <string name="accessibility_service_label">Lingua Context Reader</string>
+    <string name="accessibility_service_description">Service for reading your words from screen</string>
 </resources>
