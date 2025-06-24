@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Bitmap
 import android.graphics.PointF
 import android.os.Build
 import android.os.Bundle
@@ -15,6 +16,7 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
@@ -32,9 +34,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import com.milikovv.linguacontext.data.repo.DetailsState
 import com.milikovv.linguacontext.data.repo.SingleWordData
+import com.milikovv.linguacontext.ui.theme.LinguaContextTheme
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -44,37 +49,37 @@ class WordsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val wordsState by viewModel.serviceState.collectAsState()
+            LinguaContextTheme {
+                val wordsState by viewModel.serviceState.collectAsState()
 
-            // Skipping composition until data is available
-            val data = wordsState.data
-            if (data == null) {
-                LoadingIndicator()
-                return@setContent
-            }
-
-            val words = data.words
-            val image = data.background
-
-            Box(modifier = Modifier.fillMaxSize()) {
-                // Main UI content here
-                Canvas(modifier = Modifier.Companion.fillMaxSize()) {
-                    // Draw the background bitmap scaled to canvas size
-                    drawImage(
-                        image = image.asImageBitmap(),
-                        dstSize = IntSize(size.width.toInt(), size.height.toInt())
-                    )
+                // Skipping composition until data is available
+                val data = wordsState.data
+                if (data == null) {
+                    LoadingIndicator()
+                    return@LinguaContextTheme
                 }
 
-                val selected = words.find { it.selected }
-                MainScreen(
-                    scale = PointF(image.width.toFloat(), image.height.toFloat()),
-                    words = words,
-                    selectedWord = selected,
-                    viewModel.detailsState.collectAsState().value,
-                    onWordSelected = { viewModel.selectWord(it); viewModel.requestAnalysis() },
-                    onDismissSheet = { viewModel.selectWord(null); viewModel.stopAnalysis() }
-                )
+                val words = data.words
+                val image = data.background
+
+                Box(modifier = Modifier.fillMaxSize()) {
+                    // Main UI content here
+                    val selected = remember(words) { words.find { it.selected } }
+                    MainScreen(
+                        image = image,
+                        words = words,
+                        selectedWord = selected,
+                        detailsState = viewModel.detailsState.collectAsState().value,
+                        onWordSelected = {
+                            viewModel.selectWord(it)
+                            viewModel.requestAnalysis()
+                        },
+                        onDismissSheet = {
+                            viewModel.selectWord(null)
+                            viewModel.stopAnalysis()
+                        }
+                    )
+                }
             }
         }
     }
@@ -126,18 +131,21 @@ fun LoadingIndicator() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
-    scale: PointF,
+    image: Bitmap,
     words: List<SingleWordData>,
     selectedWord: SingleWordData?,
     detailsState: DetailsState,
     onWordSelected: (SingleWordData) -> Unit,
     onDismissSheet: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState()
     var showSheet by remember { mutableStateOf(false) }
 
-    // Show bottom sheet when selectedWord changes
+    // Safely get sheet offset; fallback to 0 if not available
+    val offsetPx = runCatching { sheetState.requireOffset().toInt() }.getOrDefault(0)
+
+    // Control showing/hiding sheet when selectedWord changes
     LaunchedEffect(selectedWord) {
         if (selectedWord != null) {
             showSheet = true
@@ -145,6 +153,21 @@ fun MainScreen(
         } else {
             scope.launch { sheetState.hide() }
             showSheet = false
+        }
+    }
+
+    val canvasOffset = if (selectedWord != null && offsetPx in 1..selectedWord.bbox.bottom) {
+        offsetPx - selectedWord.bbox.bottom - selectedWord.bbox.height()
+    } else {
+        -image.height
+    }
+
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        translate(top = canvasOffset.toFloat()) {
+            drawImage(
+                image = image.asImageBitmap(),
+                dstSize = IntSize(size.width.toInt(), size.height.toInt())
+            )
         }
     }
 
@@ -157,18 +180,26 @@ fun MainScreen(
                 },
                 sheetState = sheetState,
             ) {
-                BottomSheetContent(detailsState.detailData, detailsState.isLoading, detailsState.error)
+                BottomSheetContent(
+                    detailsState.detailData,
+                    detailsState.isLoading,
+                    detailsState.error
+                )
             }
         }
 
+        val rectOffset = if (selectedWord != null && offsetPx < selectedWord.bbox.bottom)
+            canvasOffset - image.height
+        else
+            canvasOffset
+
         RectanglesOverlay(
-            scale = scale,
+            modifier = Modifier.offset { IntOffset(0, rectOffset.toInt() + image.height) },
+            scale = PointF(image.width.toFloat(), image.height.toFloat()),
             words = words,
             selectedWord = selectedWord,
-            onRectClick = { word ->
-                onWordSelected(word)
-            }
+            isLoading = detailsState.isLoading,
+            onRectClick = onWordSelected
         )
     }
 }
-

@@ -3,17 +3,18 @@ package com.milikovv.linguacontext.ui
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,24 +35,40 @@ import androidx.compose.runtime.setValue
 
 @Composable
 fun BottomHeader(item: WordDetail) {
-    Text(item.word, style = MaterialTheme.typography.titleLarge)
+    FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        itemVerticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(item.word, style = MaterialTheme.typography.titleLarge)
+        if (item.phonetic != null)
+            Text(item.phonetic, style = MaterialTheme.typography.titleMedium, color = Color.LightGray)
+    }
 }
 
 @Composable
 fun ExplanationText(item: ExplanationDetail) {
-    Text("Explanation", style = MaterialTheme.typography.titleMedium)
+    Text(
+        "Explanation",
+        style = MaterialTheme.typography.titleMedium,
+        modifier = Modifier.padding(bottom = 8.dp)
+    )
     Text(item.text, style = MaterialTheme.typography.bodySmall)
 }
 
 @Composable
 fun FormalityBar(item: FormalityDetail) {
-    Text("Formality", style = MaterialTheme.typography.titleMedium)
+    Text(
+        "Formality",
+        style = MaterialTheme.typography.titleMedium,
+        modifier = Modifier.padding(bottom = 8.dp)
+    )
 
     var progressTarget by remember { mutableFloatStateOf(0f) }
 
     // Trigger animation after first composition
     LaunchedEffect(Unit) {
-        progressTarget = item.value.coerceIn(0f, 1f)
+        progressTarget = item.formality.coerceIn(0f, 1f)
     }
 
     // Animate the progress value from 0f to targetValue (0..1)
@@ -64,7 +81,7 @@ fun FormalityBar(item: FormalityDetail) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(24.dp)
+            .height(12.dp)
             .background(Color.LightGray, shape = RoundedCornerShape(12.dp))
     ) {
         // The animated fill bar
@@ -86,9 +103,9 @@ fun BottomSheetContent(
 ) {
     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
         if (isLoading && availItems.isEmpty()) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         } else {
-            LazyColumn {
+            LazyColumn(verticalArrangement = Arrangement.spacedBy(18.dp)) {
                 items(availItems) { item ->
                     when (item) {
                         is WordDetail -> BottomHeader(item)
@@ -99,7 +116,7 @@ fun BottomSheetContent(
                 if (isLoading) {
                     item {
                         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                         }
                     }
                 }

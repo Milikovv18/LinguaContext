@@ -2,11 +2,17 @@ package com.milikovv.linguacontext.data.repo
 
 sealed interface IDetailDataItem
 
-@JvmInline
-value class WordDetail(val word: String) : IDetailDataItem
+data class WordDetail(
+    val word: String,
+    val phonetic: String?
+) : IDetailDataItem
 
-@JvmInline
-value class ExplanationDetail(val text: String) : IDetailDataItem
 
-@JvmInline
-value class FormalityDetail(val value: Float) : IDetailDataItem
+data class ExplanationDetail(
+    val text: String
+) : IDetailDataItem
+
+
+data class FormalityDetail(
+    val formality: Float
+) : IDetailDataItem

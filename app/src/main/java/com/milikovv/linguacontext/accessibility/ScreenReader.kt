@@ -3,7 +3,6 @@ package com.milikovv.linguacontext.accessibility
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent
 import android.graphics.Bitmap
-import android.util.Log
 import android.view.Display
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
@@ -119,8 +118,6 @@ class ScreenReader : AccessibilityService() {
     }
 
     override fun onDestroy() {
-        Log.d("fef", "Accessibility disconnected")
-
         // Closing Activity when done
         val intent = Intent(WordsActivity.CLOSE_INTENT)
             .setPackage(applicationContext.packageName)

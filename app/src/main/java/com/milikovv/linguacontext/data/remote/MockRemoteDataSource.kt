@@ -15,10 +15,10 @@ class MockRemoteDataSource @Inject constructor() : RemoteDataSource {
     override suspend fun load(context: List<SingleWordData>) : Flow<IDetailDataItem> {
         val selectedWord = context.find { it.selected } ?: return flow {}
         return flow {
-            emit(WordDetail(selectedWord.word))
-            kotlinx.coroutines.delay(2.seconds)
+            emit(WordDetail(selectedWord.word, selectedWord.word))
+            kotlinx.coroutines.delay(1.seconds)
             emit(ExplanationDetail("A large text with context word translation and explanation"))
-            kotlinx.coroutines.delay(2.seconds)
+            kotlinx.coroutines.delay(1.seconds)
             emit(FormalityDetail(0.7f))
         }
     }
