@@ -74,6 +74,7 @@ class WordsViewModel @Inject constructor(
                         isLoading = false
                     )
                 } catch (e: Exception) {
+                    e.printStackTrace()
                     _detailsState.value = _detailsState.value.copy(
                         isLoading = false,
                         error = e.message

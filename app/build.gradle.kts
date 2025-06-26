@@ -45,9 +45,9 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.10.2")
-    implementation("androidx.compose.animation:animation:1.8.3")
-    implementation("androidx.compose.animation:animation-core:1.8.3")
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.androidx.animation)
+    implementation(libs.androidx.animation.core)
 
     // Compose
     implementation(libs.androidx.activity.compose)
@@ -56,6 +56,9 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.gif)
+    implementation(libs.androidx.navigation.compose)
 
     // OCR
     implementation(libs.text.recognition)
@@ -65,12 +68,12 @@ dependencies {
     kapt(libs.hilt.android.compiler)
 
     // Retrofit
-    implementation("com.google.code.gson:gson:2.13.1")
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.5.0")
+    implementation(libs.gson)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
 
     // Datastore
-    implementation("androidx.datastore:datastore-preferences:1.1.7")
+    implementation(libs.androidx.datastore.preferences)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

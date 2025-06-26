@@ -7,8 +7,7 @@ import com.milikovv.linguacontext.data.repo.ExplanationDetail
 import com.milikovv.linguacontext.data.repo.FormalityDetail
 import com.milikovv.linguacontext.data.repo.IDetailDataItem
 
-
-fun requestExplanation(word: String, context: List<String>): OllamaGenerateRequest {
+fun requestExplanation(model: String, word: String, context: List<String>): OllamaGenerateRequest {
     val prompt = """
         Задача: Переведи заданное слово на целевой язык, учитывая контекст — список слов, которые отображаются вместе с ним на одном экране.
         Если значение слова меняется под влиянием контекста или приобретает дополнительный оттенок, обязательно укажи это в переводе и поясни, в чём именно заключается изменение.
@@ -42,16 +41,16 @@ fun requestExplanation(word: String, context: List<String>): OllamaGenerateReque
         
     """.trimIndent()
 
-    return OllamaGenerateRequest(model = "qwen3:32b", prompt = prompt, stream = true)
+    return OllamaGenerateRequest(model = model, prompt = prompt, stream = false)
 }
 
 fun OllamaGenerateResponse.toExplanationDetail(): IDetailDataItem {
     // Careful with cases where one word might have multiple genders based on definition etc.
-    return ExplanationDetail(this.response.substringAfter("Ответ:"))
+    return ExplanationDetail(this.response.substringAfter("</think>").trim())
 }
 
 
-fun requestFormality(word: String, context: List<String>): OllamaGenerateRequest {
+fun requestFormality(model: String, word: String, context: List<String>): OllamaGenerateRequest {
     val prompt = """
         Задача: Оцени уровень формальности заданного слова в данном контексте.
         Формальность оценивается по шкале от 0 до 1, где 0 — абсолютно неформально, 1 — максимально формально.
@@ -81,7 +80,7 @@ fun requestFormality(word: String, context: List<String>): OllamaGenerateRequest
         
     """.trimIndent()
 
-    return OllamaGenerateRequest(model = "qwen3:32b", prompt = prompt, stream = false, format =
+    return OllamaGenerateRequest(model = model, prompt = prompt, stream = false, format =
         mapOf(
             "type" to "object",
             "properties" to mapOf(

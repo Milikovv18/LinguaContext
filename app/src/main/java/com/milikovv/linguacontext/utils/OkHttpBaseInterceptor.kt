@@ -1,11 +1,14 @@
 package com.milikovv.linguacontext.utils
 
+import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import okhttp3.HttpUrl
 import okhttp3.Interceptor
 import okhttp3.Response
+import okhttp3.ResponseBody
+
 
 class OkHttpBaseUrlInterceptor(
     private val baseUrlFlow: Flow<String>
@@ -16,7 +19,7 @@ class OkHttpBaseUrlInterceptor(
     private var currentBaseUrl: HttpUrl? = null
 
     // Collect the flow in a coroutine to update currentBaseUrl asynchronously
-    fun startCollecting(scope: CoroutineScope) {
+    fun monitorUpdates(scope: CoroutineScope) {
         scope.launch {
             baseUrlFlow.collect { urlString ->
                 try {
@@ -50,6 +53,13 @@ class OkHttpBaseUrlInterceptor(
             .url(newUrl)
             .build()
 
-        return chain.proceed(newRequest)
+        val response = chain.proceed(newRequest)
+        val rawJson = response.body()!!.string()
+        Log.d("RawJsonResponse", rawJson)
+
+        // Re-create response before returning because body can be read only once
+        return response.newBuilder()
+            .body(ResponseBody.create(response.body()!!.contentType(), rawJson))
+            .build()
     }
 }

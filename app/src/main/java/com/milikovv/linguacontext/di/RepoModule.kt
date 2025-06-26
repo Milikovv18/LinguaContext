@@ -1,7 +1,7 @@
 package com.milikovv.linguacontext.di
 
 import com.milikovv.linguacontext.data.local.MemoryLocalDataSource
-import com.milikovv.linguacontext.data.remote.MockRemoteDataSource
+import com.milikovv.linguacontext.data.remote.RemoteRestfullDataSource
 import com.milikovv.linguacontext.data.repo.CoreRepositoryImpl
 import com.milikovv.linguacontext.data.repo.ServiceDataItem
 import com.milikovv.linguacontext.data.repo.WordsContainerData
@@ -34,7 +34,7 @@ interface LocalRepoModule {
 interface RemoteRepoModule {
     @Binds
     @Singleton
-    fun provideEmptyRepo(repo: MockRemoteDataSource): RemoteDataSource
+    fun provideEmptyRepo(repo: RemoteRestfullDataSource): RemoteDataSource
 }
 
 @Module

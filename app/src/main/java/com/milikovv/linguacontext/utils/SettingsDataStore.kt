@@ -5,26 +5,26 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import java.io.IOException
+import javax.inject.Inject
 
 // Extension property to create DataStore instance
 private val Context.dataStore by preferencesDataStore(name = "user_prefs")
 
-class DataStoreManager(private val context: Context) {
+data class Settings(
+    val baseUrl: String = "127.0.0.1:11434",
+    val modelName: String = "qwen3:32b"
+)
 
-    companion object {
-        // Key for storing base URL string
-        private val BASE_URL_KEY = stringPreferencesKey("base_url")
-
-        // Default base URL if none saved
-        private const val DEFAULT_BASE_URL = ""
-    }
-
+class DataStoreManager @Inject constructor(
+    @ApplicationContext private val context: Context
+) {
     // Flow to observe base URL changes, emits current or default value
-    val baseUrlFlow: Flow<String> = context.dataStore.data
+    val settingsFlow: Flow<Settings> = context.dataStore.data
         .catch { exception ->
             // Handle exceptions, e.g. IOException when reading data
             if (exception is IOException) {
@@ -34,7 +34,10 @@ class DataStoreManager(private val context: Context) {
             }
         }
         .map { preferences ->
-            preferences[BASE_URL_KEY] ?: DEFAULT_BASE_URL
+            Settings(
+                baseUrl = preferences[BASE_URL_KEY] ?: "127.0.0.1:11434",
+                modelName = preferences[LLM_KEY] ?: "qwen3:32b"
+            )
         }
 
     // Suspend function to save/update base URL
@@ -42,5 +45,19 @@ class DataStoreManager(private val context: Context) {
         context.dataStore.edit { preferences ->
             preferences[BASE_URL_KEY] = url
         }
+    }
+
+    // Suspend function to save/update model name
+    suspend fun saveModelName(name: String) {
+        context.dataStore.edit { preferences ->
+            preferences[LLM_KEY] = name
+        }
+    }
+
+
+    companion object {
+        // Keys for storing base URL string and LLM name
+        private val BASE_URL_KEY = stringPreferencesKey("base_url")
+        private val LLM_KEY = stringPreferencesKey("model")
     }
 }

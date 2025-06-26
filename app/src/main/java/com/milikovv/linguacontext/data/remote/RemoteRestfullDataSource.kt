@@ -13,10 +13,12 @@ import com.milikovv.linguacontext.data.repo.SingleWordData
 import com.milikovv.linguacontext.data.repo.WordDetail
 import com.milikovv.linguacontext.domain.remote.RemoteDataSource
 import jakarta.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.launch
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -24,10 +26,25 @@ import retrofit2.http.Path
 
 class RemoteRestfullDataSource @Inject constructor(
     val dictService: DictService,
-    val ollamaService: OllamaService
+    val ollamaService: OllamaService,
+    private val modelNameFlow: Flow<String?>
 ) : RemoteDataSource {
+    // Use a volatile variable to hold the latest base URL
+    @Volatile
+    private var currentModelName: String? = null
+
+    // Collect the flow in a coroutine to update currentBaseUrl asynchronously
+    fun monitorUpdates(scope: CoroutineScope) {
+        scope.launch {
+            modelNameFlow.collect { currentModelName = it }
+        }
+    }
 
     override suspend fun load(context: List<SingleWordData>): Flow<IDetailDataItem> {
+        val modelName = currentModelName
+        if (modelName == null)
+            throw Exception("No model name provided")
+
         val selected = context.find { it.selected } ?: return flow {}
         return flow<IDetailDataItem> {
             // Simple operations with dictionary
@@ -40,10 +57,10 @@ class RemoteRestfullDataSource @Inject constructor(
             )
 
             // Advanced context analysis
-            val explanationPrompt = requestExplanation(selected.word, context.map { it.word })
+            val explanationPrompt = requestExplanation(modelName, selected.word, context.map { it.word })
             emit(ollamaService.generate(explanationPrompt).toExplanationDetail())
 
-            val formalityPrompt = requestFormality(selected.word, context.map { it.word })
+            val formalityPrompt = requestFormality(modelName, selected.word, context.map { it.word })
             emit(ollamaService.generate(formalityPrompt).toFormalityDetail())
         }.flowOn(Dispatchers.IO)
     }
