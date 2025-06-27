@@ -115,7 +115,7 @@ fun AppNavHost(
                 modifier = Modifier.fillMaxSize()
             ) {
                 TranslatorScreen(
-                    ipAddress = "192.168.1.1",
+                    ipAddress = settings.baseUrl,
                     onEditIpClick = { navController.navigate("edit_ip") },
                     onOpenSettingsClick = onOpenSettingsClick,
                 )
@@ -199,7 +199,7 @@ fun TranslatorScreen(
                 ) {
                     Text(
                         text = ipAddress,
-                        fontSize = 32.sp,
+                        fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.Monospace,
                         letterSpacing = 0.sp,
