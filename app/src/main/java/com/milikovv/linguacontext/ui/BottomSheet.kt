@@ -31,6 +31,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import com.milikovv.linguacontext.R
+import com.milikovv.linguacontext.ui.theme.LinguaContextTheme
 
 
 @Composable
@@ -40,17 +44,17 @@ fun BottomHeader(item: WordDetail) {
         itemVerticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(item.word, style = MaterialTheme.typography.titleLarge)
+        Text(item.word, style = MaterialTheme.typography.titleMedium)
         if (item.phonetic != null)
-            Text(item.phonetic, style = MaterialTheme.typography.titleMedium, color = Color.LightGray)
+            Text(item.phonetic, style = MaterialTheme.typography.titleSmall, color = Color.LightGray)
     }
 }
 
 @Composable
 fun ExplanationText(item: ExplanationDetail) {
     Text(
-        "Explanation",
-        style = MaterialTheme.typography.titleMedium,
+        stringResource(R.string.explanation),
+        style = MaterialTheme.typography.titleSmall,
         modifier = Modifier.padding(bottom = 8.dp)
     )
     Text(item.text, style = MaterialTheme.typography.bodySmall)
@@ -59,8 +63,8 @@ fun ExplanationText(item: ExplanationDetail) {
 @Composable
 fun FormalityBar(item: FormalityDetail) {
     Text(
-        "Formality",
-        style = MaterialTheme.typography.titleMedium,
+        stringResource(R.string.formality),
+        style = MaterialTheme.typography.titleSmall,
         modifier = Modifier.padding(bottom = 8.dp)
     )
 
@@ -101,7 +105,9 @@ fun BottomSheetContent(
     isLoading: Boolean,
     error: String? = null
 ) {
-    Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .padding(16.dp)) {
         if (isLoading && availItems.isEmpty()) {
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         } else {
@@ -125,5 +131,18 @@ fun BottomSheetContent(
         error?.let { errorMsg ->
             Text(text = "Error: $errorMsg", color = Color.Red)
         }
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun BottomSheetPreview() {
+    LinguaContextTheme {
+        BottomSheetContent(listOf(
+            WordDetail("Hello", "hello"),
+            ExplanationDetail("Kinda long explanation here just for multiline content. Kinda long explanation here just for multiline content"),
+            FormalityDetail(0.5f)
+        ), false)
     }
 }

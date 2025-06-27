@@ -8,8 +8,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.milikovv.linguacontext.R
 import com.milikovv.linguacontext.ui.theme.LinguaContextTheme
 import com.milikovv.linguacontext.utils.Settings
 import kotlinx.coroutines.launch
@@ -36,16 +38,12 @@ fun SettingsScreen(
         },
         topBar = {
             TopAppBar(
-                title = { Text("Edit LLM data") },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ),
+                title = { Text(stringResource(R.string.edit_llm_data)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Go back"
+                            contentDescription = stringResource(R.string.description_go_back)
                         )
                     }
                 },
@@ -59,10 +57,11 @@ fun SettingsScreen(
             ) {
                 // Label + Rounded OutlinedTextField 1
                 Text(
-                    text = "Ollama server IP and port",
+                    text = stringResource(R.string.ip_port),
                     style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
+                val baseUrlUpdated = stringResource(id = R.string.base_url_updated)
                 OutlinedTextField(
                     value = baseUrlField,
                     singleLine = true,
@@ -76,7 +75,7 @@ fun SettingsScreen(
                             keyboardController?.hide()
                             scope.launch {
                                 snackbarHostState.showSnackbar(
-                                    message = "Base URL updated",
+                                    message = baseUrlUpdated,
                                     duration = SnackbarDuration.Short
                                 )
                             }
@@ -86,10 +85,11 @@ fun SettingsScreen(
 
                 // Label + Rounded OutlinedTextField 3
                 Text(
-                    text = "LLM model",
+                    text = stringResource(R.string.llm_model),
                     style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
+                val modelNameUpdated = stringResource(id = R.string.model_name_updated)
                 OutlinedTextField(
                     value = modelNameField,
                     singleLine = true,
@@ -101,7 +101,7 @@ fun SettingsScreen(
                             keyboardController?.hide()
                             scope.launch {
                                 snackbarHostState.showSnackbar(
-                                    message = "Model name updated",
+                                    message = modelNameUpdated,
                                     duration = SnackbarDuration.Short
                                 )
                             }

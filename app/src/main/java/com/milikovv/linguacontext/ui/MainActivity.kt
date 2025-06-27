@@ -22,7 +22,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -58,7 +57,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MaterialTheme {
+            LinguaContextTheme {
                 val settingsState by viewModel.storageState.collectAsState()
 
                 MyApp(
@@ -144,15 +143,11 @@ fun TranslatorScreen(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.app_name)) },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ),
                 actions = {
                     IconButton(onClick = onOpenSettingsClick) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings"
+                            contentDescription = stringResource(R.string.settings_menu)
                         )
                     }
                 }
@@ -186,13 +181,13 @@ fun TranslatorScreen(
                             .data(R.drawable.scrolling_rectangles)
                             .build(),
                         imageLoader = imageLoader,
-                        contentDescription = "Main GIF",
+                        contentDescription = stringResource(R.string.description_main_gif),
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
                     Icon(
                         imageVector = Icons.Default.Search,
-                        contentDescription = "Magnifying Glass",
+                        contentDescription = stringResource(R.string.description_magnifying_glass),
                         modifier = Modifier.fillMaxSize(),
                         tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
                     )
@@ -212,7 +207,7 @@ fun TranslatorScreen(
                     )
 
                     Text(
-                        text = "click to edit",
+                        text = stringResource(R.string.click_to_edit),
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(top = 4.dp)

@@ -44,13 +44,13 @@ fun LinguaContextTheme(
     }
 
     val customTypography = Typography(
-        titleLarge = TextStyle(
+        titleMedium = TextStyle(
             fontWeight = FontWeight.Medium,
             fontSize = 48.sp,
             lineHeight = 48.sp,
             letterSpacing = 0.sp
         ),
-        titleMedium = TextStyle(
+        titleSmall = TextStyle(
             fontWeight = FontWeight.SemiBold,
             fontSize = 22.sp,
             lineHeight = 32.sp,

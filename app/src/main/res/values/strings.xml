@@ -2,4 +2,16 @@
     <string name="app_name">Lingua Context</string>
     <string name="accessibility_service_label">Lingua Context Reader</string>
     <string name="accessibility_service_description">Service for reading your words from screen</string>
+    <string name="explanation">Explanation</string>
+    <string name="formality">Formality</string>
+    <string name="settings_menu">Settings</string>
+    <string name="description_main_gif">Main GIF</string>
+    <string name="description_magnifying_glass">Magnifying Glass</string>
+    <string name="click_to_edit">click to edit</string>
+    <string name="edit_llm_data">Edit LLM data</string>
+    <string name="description_go_back">Go back</string>
+    <string name="ip_port">Ollama server IP and port</string>
+    <string name="llm_model">LLM model</string>
+    <string name="base_url_updated">Base URL updated</string>
+    <string name="model_name_updated">Model name updated</string>
 </resources>

@@ -104,7 +104,6 @@ class WordsActivity : ComponentActivity() {
 
     private val closeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            Log.d(TAG, "GOT INTENT")
             if (intent?.action == CLOSE_INTENT) {
                 finish()
             }
