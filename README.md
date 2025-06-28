@@ -54,7 +54,7 @@ It's especially useful for contributors.
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/contextual-translator.git
+   git clone https://github.com/Milikovv18/LinguaContext
    ```
 2. **Set up your base Ollama URL** in-app or via DataStore (see in-app settings)
 3. **Build and run** with Android Studio
@@ -110,7 +110,7 @@ The app follows a clean, modular MVVM architecture inspired by Google’s best p
           /remote      # Retrofit API, OkHttp, DTOs
           /local       # DataStore, local persistence
         /accessibility # Accessibility Service implementation
-    /test              # Unit & Robolectric tests
+    /test              # Unit tests
     /androidTest       # Instrumented & Compose UI tests
 ```
 
