@@ -1,7 +1,7 @@
 # 🔎 Lingua Context
 [![Android CI/CD](https://github.com/Milikovv18/LinguaContext/actions/workflows/android.yml/badge.svg)](https://github.com/Milikovv18/LinguaContext/actions/workflows/android.yml)
 
-<img src="https://github.com/user-attachments/assets/9c4078e1-f906-45d8-b5a9-046e8c4d8c29" align="right" width=50/>
+<img src="https://github.com/user-attachments/assets/e63cb1d8-910a-488d-9749-4f105245b1a4" align="right"/>
 
 *This project was created specifically for my CV, so this README includes technical details to showcase my skills and implementation decisions.*
 
