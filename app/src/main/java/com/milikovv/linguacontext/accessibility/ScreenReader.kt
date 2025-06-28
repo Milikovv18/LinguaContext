@@ -96,7 +96,7 @@ class ScreenReader : AccessibilityService() {
                             val bitmap = Bitmap.wrapHardwareBuffer(hardwareBuffer, colorSpace)
                             hardwareBuffer.close() // Free resources
                             if (bitmap != null) {
-                                cont.resume(bitmap, onCancellation = null)
+                                cont.resume(bitmap) { _, _, _ -> }
                             } else {
                                 cont.resumeWithException(IllegalStateException("Bitmap is null"))
                             }
