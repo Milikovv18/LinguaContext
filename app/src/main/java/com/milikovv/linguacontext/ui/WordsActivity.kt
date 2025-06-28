@@ -42,6 +42,11 @@ import com.milikovv.linguacontext.data.repo.SingleWordData
 import com.milikovv.linguacontext.ui.theme.LinguaContextTheme
 import kotlinx.coroutines.launch
 
+/**
+ * Transparent-like activity that acts like overlay and highlights words to easily identify
+ * their bounds. Shows bottom sheet with details about selected word (contextual translation and
+ * formality scale).
+ */
 @AndroidEntryPoint
 class WordsActivity : ComponentActivity() {
     private val viewModel: WordsViewModel by viewModels()

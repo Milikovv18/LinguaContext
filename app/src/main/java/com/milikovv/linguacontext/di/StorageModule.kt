@@ -19,6 +19,9 @@ annotation class UserBaseUrl
 @Retention(AnnotationRetention.BINARY)
 annotation class DebugBaseUrl
 
+/**
+ * Simplified [UserSettings] to avoid Android API access.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object DebugSettingsModule {

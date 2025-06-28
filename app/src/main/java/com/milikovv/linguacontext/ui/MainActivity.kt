@@ -50,6 +50,10 @@ import com.milikovv.linguacontext.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.getValue
 
+/**
+ * App launcher activity that displays current remote data source IP, provides quick access to
+ * Accessibility Service settings and in-app settings (to setup Ollama client).
+ */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModels()

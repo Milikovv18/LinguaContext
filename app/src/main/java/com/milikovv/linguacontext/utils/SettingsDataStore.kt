@@ -15,11 +15,17 @@ import javax.inject.Inject
 // Extension property to create DataStore instance
 private val Context.dataStore by preferencesDataStore(name = "user_prefs")
 
+/**
+ * In-app settings container saved to shared preferences
+ */
 data class Settings(
     val baseUrl: String = "127.0.0.1:11434",
     val modelName: String = "qwen3:32b"
 )
 
+/**
+ * [preferencesDataStore] manager. Provides methods to change preferences' values and default values.
+ */
 class DataStoreManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {

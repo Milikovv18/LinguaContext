@@ -11,6 +11,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlin.time.Duration.Companion.seconds
 
+/**
+ * Mock data source for quick manual tests.
+ * Emits mock data in a form of [IDetailDataItem] every second.
+ */
 class MockRemoteDataSource @Inject constructor() : RemoteDataSource {
     override suspend fun load(context: List<SingleWordData>) : Flow<IDetailDataItem> {
         val selectedWord = context.find { it.selected } ?: return flow {}

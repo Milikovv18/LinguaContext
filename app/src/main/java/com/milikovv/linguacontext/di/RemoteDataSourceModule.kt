@@ -23,7 +23,10 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
-
+/**
+ * Initializes Open dictionary and Ollama APIs. Sets up [OkHttpBaseUrlInterceptor] to monitor
+ * base URL changes.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object RemoteRestfulDataSourceModule {

@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.google.dagger.hilt.android")
     id("org.jetbrains.kotlin.kapt")
+    id("org.jetbrains.dokka") version "2.0.0"
 }
 
 android {
@@ -86,4 +87,7 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockwebserver3)
+
+    // Documentation
+    dokkaPlugin(libs.android.documentation.plugin)
 }

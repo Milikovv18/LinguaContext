@@ -9,7 +9,13 @@ import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 
-
+/**
+ * Data repo implementation leveraging [LocalDataSource] and [RemoteDataSource] for both
+ * OCR service and details downloaded from network.
+ * @param localServiceDataSource local data source (service POV)
+ * @param localWordsDataSource local data source (ViewModel POV)
+ * @param remoteDataSource remote data source (networking)
+ */
 @Singleton
 class CoreRepositoryImpl @Inject constructor(
     private val localServiceDataSource: LocalDataSource<ServiceDataItem>,

@@ -7,6 +7,13 @@ import com.milikovv.linguacontext.data.repo.ExplanationDetail
 import com.milikovv.linguacontext.data.repo.FormalityDetail
 import com.milikovv.linguacontext.data.repo.IDetailDataItem
 
+/**
+ * Explanation prompt constructor.
+ * @param model target Ollama LLM model
+ * @param word word to analyse
+ * @param context full context surrounding the word (may include the word itself)
+ * @return prompt in an Ollama API acceptable format
+ */
 fun requestExplanation(model: String, word: String, context: List<String>): OllamaGenerateRequest {
     val prompt = """
         Задача: Переведи заданное слово на целевой язык, учитывая контекст — список слов, которые отображаются вместе с ним на одном экране.
@@ -44,12 +51,23 @@ fun requestExplanation(model: String, word: String, context: List<String>): Olla
     return OllamaGenerateRequest(model = model, prompt = prompt, stream = false)
 }
 
+/**
+ * Custom mapper of [OllamaGenerateResponse] returned by Ollama API to a processable data
+ * class [ExplanationDetail].
+ */
 fun OllamaGenerateResponse.toExplanationDetail(): IDetailDataItem {
     // Careful with cases where one word might have multiple genders based on definition etc.
     return ExplanationDetail(this.response.substringAfter("</think>").trim())
 }
 
 
+/**
+ * Formality prompt constructor.
+ * @param model target Ollama LLM model
+ * @param word word to analyse
+ * @param context full context surrounding the word (may include the word itself)
+ * @return prompt in an Ollama API acceptable format
+ */
 fun requestFormality(model: String, word: String, context: List<String>): OllamaGenerateRequest {
     val prompt = """
         Задача: Оцени уровень формальности заданного слова в данном контексте.
@@ -93,6 +111,10 @@ fun requestFormality(model: String, word: String, context: List<String>): Ollama
     )
 }
 
+/**
+ * Custom mapper of [OllamaGenerateResponse] returned by Ollama API to a processable data
+ * class [FormalityDetail].
+ */
 fun OllamaGenerateResponse.toFormalityDetail(): IDetailDataItem {
     return Gson().fromJson(this.response, FormalityDetail::class.java)
 }

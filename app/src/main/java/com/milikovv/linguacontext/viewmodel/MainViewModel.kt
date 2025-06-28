@@ -11,6 +11,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * ViewModel for MainActivity that observes [DataStoreManager] and allows user to change settings
+ * from inside the app.
+ */
 @HiltViewModel
 class MainViewModel @Inject constructor(
     val storeManager: DataStoreManager

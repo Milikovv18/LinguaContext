@@ -20,6 +20,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlinx.coroutines.tasks.await
 
+/**
+ * Observes [WordsState] and [DetailsState], implements initial screenshot scanning and processes
+ * remote data. Handles user's word selection.
+ */
 @HiltViewModel
 class WordsViewModel @Inject constructor(
     private val repo: WordsRepository

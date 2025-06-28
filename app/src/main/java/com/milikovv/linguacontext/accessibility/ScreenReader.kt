@@ -24,18 +24,32 @@ import java.util.concurrent.Executors
 import javax.inject.Inject
 import kotlin.coroutines.resumeWithException
 
+/**
+ * System service that provides access to screen contents in a textual and visual form.
+ * The class is created by system whenever AS shortcut is used, so it guarantees screen contents
+ * access only when user requests it explicitly.<br>
+ * Textual info extracted via [getFlatNodeInfoList], screenshots are retrieved
+ * with [takeScreenshotSuspend].
+ */
 @AndroidEntryPoint
 class ScreenReader : AccessibilityService() {
+    // Custom coroutine scope is need here, because AccessibilityService doesn't provide one
     private val serviceJob = Job()
     private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
 
-    @Inject
+    @Inject // Repo to write collected data to
     lateinit var repo: ServiceRepository
 
+    /**
+     * Unused in this app and is never called
+     */
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         TODO("Not yet implemented")
     }
 
+    /**
+     * Start collecting data immediately after service connected event (e.g. on shortcut click).
+     */
     override fun onServiceConnected() {
         super.onServiceConnected()
 
@@ -59,6 +73,11 @@ class ScreenReader : AccessibilityService() {
         }
     }
 
+    /**
+     * Flattens [AccessibilityNodeInfo] to a list of easily processable [NodeInfoData].
+     * Filters out nodes with empty text field.
+     * @return flattened list
+     */
     private suspend fun getFlatNodeInfoList() : List<NodeInfoData> =
         withContext(Dispatchers.Default) {
             val list = mutableListOf<NodeInfoData>()
@@ -82,6 +101,11 @@ class ScreenReader : AccessibilityService() {
             list
         }
 
+    /**
+     * Retrieves screenshot in a form of [Bitmap].<br>
+     * Calls [takeScreenshot] under the hood. Wraps callback into [suspendCancellableCoroutine].
+     * @return screenshot image data
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
     private suspend fun takeScreenshotSuspend() : Bitmap =
         suspendCancellableCoroutine { cont ->
@@ -117,6 +141,9 @@ class ScreenReader : AccessibilityService() {
         TODO("Not yet implemented")
     }
 
+    /**
+     * Requests app shutdown via [WordsActivity.CLOSE_INTENT]. E.g. on shortcut click.
+     */
     override fun onDestroy() {
         // Closing Activity when done
         val intent = Intent(WordsActivity.CLOSE_INTENT)

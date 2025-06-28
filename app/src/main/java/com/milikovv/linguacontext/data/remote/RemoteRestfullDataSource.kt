@@ -24,6 +24,12 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 
+/**
+ * Remote (network) data source leveraging Retrofit for structured I/O.
+ * @param dictService Open dictionary APIs
+ * @param ollamaService Ollama APIs
+ * @param modelNameFlow LLM model name changeable by user
+ */
 class RemoteRestfullDataSource @Inject constructor(
     val dictService: DictService,
     val ollamaService: OllamaService,
@@ -66,7 +72,9 @@ class RemoteRestfullDataSource @Inject constructor(
     }
 }
 
-
+/**
+ * Lists Open dictionary API entries with input parameters and expected response.
+ */
 interface DictService {
     @GET("en/{word}")
     suspend fun getEnWordData(@Path("word") word: String): OpenDictionaryApiModel
@@ -76,6 +84,9 @@ interface DictService {
     }
 }
 
+/**
+ * Lists Ollama API entries with input parameters and expected response.
+ */
 interface OllamaService {
     @POST("api/generate")
     suspend fun generate(@Body request: OllamaGenerateRequest): OllamaGenerateResponse

@@ -9,7 +9,10 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import okhttp3.ResponseBody
 
-
+/**
+ * OkHttp based interceptor to substitute base URL at runtime.
+ * @param baseUrlFlow user-changeable base URL flow
+ */
 class OkHttpBaseUrlInterceptor(
     private val baseUrlFlow: Flow<String>
 ) : Interceptor {
