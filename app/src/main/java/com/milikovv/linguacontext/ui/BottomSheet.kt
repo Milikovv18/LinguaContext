@@ -51,16 +51,6 @@ fun BottomHeader(item: WordDetail) {
 }
 
 @Composable
-fun ExplanationText(item: ExplanationDetail) {
-    Text(
-        stringResource(R.string.explanation),
-        style = MaterialTheme.typography.titleSmall,
-        modifier = Modifier.padding(bottom = 8.dp)
-    )
-    Text(item.text, style = MaterialTheme.typography.bodySmall)
-}
-
-@Composable
 fun FormalityBar(item: FormalityDetail) {
     Text(
         stringResource(R.string.formality),
@@ -103,6 +93,7 @@ fun FormalityBar(item: FormalityDetail) {
 fun BottomSheetContent(
     availItems: List<IDetailDataItem>,
     isLoading: Boolean,
+    onSkipThink: () -> Unit,
     error: String? = null
 ) {
     Column(modifier = Modifier
@@ -115,7 +106,7 @@ fun BottomSheetContent(
                 items(availItems) { item ->
                     when (item) {
                         is WordDetail -> BottomHeader(item)
-                        is ExplanationDetail -> ExplanationText(item)
+                        is ExplanationDetail -> OllamaResponseView(item, onSkipThink)
                         is FormalityDetail -> FormalityBar(item)
                     }
                 }
@@ -141,8 +132,8 @@ fun BottomSheetPreview() {
     LinguaContextTheme {
         BottomSheetContent(listOf(
             WordDetail("Hello", "hello"),
-            ExplanationDetail("Kinda long explanation here just for multiline content. Kinda long explanation here just for multiline content"),
+            ExplanationDetail("Kinda long explanation here just for multiline content. Kinda long explanation here just for multiline content", "", 0L, false),
             FormalityDetail(0.5f)
-        ), false)
+        ), false, {})
     }
 }

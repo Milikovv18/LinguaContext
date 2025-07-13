@@ -56,6 +56,7 @@ class WordsActivity : ComponentActivity() {
         setContent {
             LinguaContextTheme {
                 val wordsState by viewModel.serviceState.collectAsState()
+                val detailsState by viewModel.detailsState.collectAsState()
 
                 // Skipping composition until data is available
                 val data = wordsState.data
@@ -74,7 +75,7 @@ class WordsActivity : ComponentActivity() {
                         image = image,
                         words = words,
                         selectedWord = selected,
-                        detailsState = viewModel.detailsState.collectAsState().value,
+                        detailsState = detailsState,
                         onWordSelected = {
                             viewModel.selectWord(it)
                             viewModel.requestAnalysis()
@@ -82,6 +83,9 @@ class WordsActivity : ComponentActivity() {
                         onDismissSheet = {
                             viewModel.selectWord(null)
                             viewModel.stopAnalysis()
+                        },
+                        onSkipThink = {
+                            viewModel.skipThinking()
                         }
                     )
                 }
@@ -140,7 +144,8 @@ fun MainScreen(
     selectedWord: SingleWordData?,
     detailsState: DetailsState,
     onWordSelected: (SingleWordData) -> Unit,
-    onDismissSheet: () -> Unit
+    onDismissSheet: () -> Unit,
+    onSkipThink: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState()
@@ -187,6 +192,7 @@ fun MainScreen(
                 BottomSheetContent(
                     detailsState.detailData,
                     detailsState.isLoading,
+                    onSkipThink,
                     detailsState.error
                 )
             }

@@ -5,9 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.milikovv.linguacontext.utils.DataStoreManager
 import com.milikovv.linguacontext.utils.Settings
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -19,8 +17,7 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     val storeManager: DataStoreManager
 ) : ViewModel() {
-    val storageState: StateFlow<Settings> = storeManager.settingsFlow
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), Settings())
+    val storageState: StateFlow<Settings> = storeManager.effectiveSettings
 
     fun updateBaseUrl(url: String) {
         viewModelScope.launch {
@@ -31,6 +28,12 @@ class MainViewModel @Inject constructor(
     fun updateModelName(name: String) {
         viewModelScope.launch {
             storeManager.saveModelName(name)
+        }
+    }
+
+    fun updateThinkMode(enabled: Boolean) {
+        viewModelScope.launch {
+            storeManager.saveThinkMode(enabled)
         }
     }
 }

@@ -6,12 +6,15 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.milikovv.linguacontext.data.repo.DetailsState
+import com.milikovv.linguacontext.data.repo.ExplanationDetail
 import com.milikovv.linguacontext.data.repo.ServiceDataItem
 import com.milikovv.linguacontext.data.repo.SingleWordData
 import com.milikovv.linguacontext.data.repo.WordsContainerData
 import com.milikovv.linguacontext.data.repo.WordsState
 import com.milikovv.linguacontext.domain.repo.WordsRepository
+import com.milikovv.linguacontext.utils.DataStoreManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +29,8 @@ import kotlinx.coroutines.tasks.await
  */
 @HiltViewModel
 class WordsViewModel @Inject constructor(
-    private val repo: WordsRepository
+    private val repo: WordsRepository,
+    private val settingsStore: DataStoreManager
 ) : ViewModel() {
     private val _serviceState = MutableStateFlow(WordsState())
     val serviceState: StateFlow<WordsState> = _serviceState.asStateFlow()
@@ -65,18 +69,48 @@ class WordsViewModel @Inject constructor(
                 _detailsState.value = DetailsState(isLoading = true)
                 try {
                     // Loading chunks of data
-                    repo.loadDetailsData(data.words)
-                        .collect { chunk ->
-                            val currentItems = _detailsState.value.detailData
-                            _detailsState.value = _detailsState.value.copy(
-                                detailData = currentItems + chunk
-                            )
+                    var thinkingText = ""
+                    var answerText = ""
+                    val chunksFlow = repo.loadDetailsData(data.words)
+                    chunksFlow.collect { chunk ->
+                        when (chunk) {
+                            is ExplanationDetail -> {
+                                // Append the new token to the accumulated text
+                                thinkingText += chunk.thinkingText
+                                answerText += chunk.answerText
+                                // Update the state with the same item, but new text
+                                val currentItems = _detailsState.value.detailData
+                                val updatedItems =
+                                    if (currentItems.lastOrNull() is ExplanationDetail) {
+                                        currentItems.dropLast(1) + chunk.copy(
+                                            thinkingText = thinkingText,
+                                            answerText = answerText
+                                        )
+                                    } else {
+                                        currentItems + chunk.copy(
+                                            thinkingText = thinkingText,
+                                            answerText = answerText
+                                        )
+                                    }
+                                _detailsState.value =
+                                    _detailsState.value.copy(detailData = updatedItems)
+                            }
+
+                            else -> {
+                                val currentItems = _detailsState.value.detailData
+                                _detailsState.value = _detailsState.value.copy(
+                                    detailData = currentItems + chunk
+                                )
+                            }
                         }
+                    }
 
                     // Finish loading
                     _detailsState.value = _detailsState.value.copy(
                         isLoading = false
                     )
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
                     e.printStackTrace()
                     _detailsState.value = _detailsState.value.copy(
@@ -91,6 +125,13 @@ class WordsViewModel @Inject constructor(
     fun stopAnalysis() {
         analysisJob?.cancel()
         analysisJob = null
+        settingsStore.overrideSettings(skipThinking = false)
+    }
+
+    fun skipThinking() {
+        stopAnalysis()
+        settingsStore.overrideSettings(skipThinking = true)
+        requestAnalysis()
     }
 
 

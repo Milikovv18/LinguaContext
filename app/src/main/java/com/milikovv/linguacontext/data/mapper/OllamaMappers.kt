@@ -6,6 +6,10 @@ import com.milikovv.linguacontext.data.remote.model.OllamaGenerateResponse
 import com.milikovv.linguacontext.data.repo.ExplanationDetail
 import com.milikovv.linguacontext.data.repo.FormalityDetail
 import com.milikovv.linguacontext.data.repo.IDetailDataItem
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.FlowCollector
+import okhttp3.ResponseBody
+import kotlin.coroutines.coroutineContext
 
 /**
  * Explanation prompt constructor.
@@ -14,8 +18,9 @@ import com.milikovv.linguacontext.data.repo.IDetailDataItem
  * @param context full context surrounding the word (may include the word itself)
  * @return prompt in an Ollama API acceptable format
  */
-fun requestExplanation(model: String, word: String, context: List<String>): OllamaGenerateRequest {
-    val prompt = """
+fun requestExplanation(model: String, word: String, context: List<String>, doThink: Boolean):
+        OllamaGenerateRequest {
+    val prompt = (if (doThink) "" else "/no_think\n") + """
         Задача: Переведи заданное слово на целевой язык, учитывая контекст — список слов, которые отображаются вместе с ним на одном экране.
         Если значение слова меняется под влиянием контекста или приобретает дополнительный оттенок, обязательно укажи это в переводе и поясни, в чём именно заключается изменение.
         
@@ -48,16 +53,37 @@ fun requestExplanation(model: String, word: String, context: List<String>): Olla
         
     """.trimIndent()
 
-    return OllamaGenerateRequest(model = model, prompt = prompt, stream = false)
+    return OllamaGenerateRequest(model = model, prompt = prompt, stream = true)
 }
 
 /**
  * Custom mapper of [OllamaGenerateResponse] returned by Ollama API to a processable data
  * class [ExplanationDetail].
  */
-fun OllamaGenerateResponse.toExplanationDetail(): IDetailDataItem {
-    // Careful with cases where one word might have multiple genders based on definition etc.
-    return ExplanationDetail(this.response.substringAfter("</think>").trim())
+suspend fun ResponseBody.emitExplanationDetailInto(collector: FlowCollector<ExplanationDetail>) {
+    val source = this.source() ?: throw Exception("Source is not available")
+    val converter = Gson()
+
+    var isThinking = false
+    while (!source.exhausted()) {
+        coroutineContext.ensureActive()
+        val line = source.readUtf8Line()
+        val response = converter.fromJson(line.toString(), OllamaGenerateResponse::class.java)
+
+        if (response.response == "<think>")
+            isThinking = true
+
+        collector.emit(ExplanationDetail(
+            thinkingText = if (isThinking) response.response else "",
+            answerText = if (isThinking) "" else response.response,
+            time = response.total_duration,
+            isThinking = isThinking
+        ))
+
+        // </think> token is still a part of thinking
+        if (response.response == "</think>")
+            isThinking = false
+    }
 }
 
 
@@ -68,8 +94,9 @@ fun OllamaGenerateResponse.toExplanationDetail(): IDetailDataItem {
  * @param context full context surrounding the word (may include the word itself)
  * @return prompt in an Ollama API acceptable format
  */
-fun requestFormality(model: String, word: String, context: List<String>): OllamaGenerateRequest {
-    val prompt = """
+fun requestFormality(model: String, word: String, context: List<String>, doThink: Boolean):
+        OllamaGenerateRequest {
+    val prompt = (if (doThink) "" else "/no_think\n") + """
         Задача: Оцени уровень формальности заданного слова в данном контексте.
         Формальность оценивается по шкале от 0 до 1, где 0 — абсолютно неформально, 1 — максимально формально.
         Контекст — список слов, отображающихся вместе с целевым словом на одном экране, которые могут влиять на восприятие формальности.

@@ -68,6 +68,7 @@ class MainActivity : ComponentActivity() {
                     settingsState,
                     onBaseUrlChanged = { viewModel.updateBaseUrl(it) },
                     onModelNameChanged = { viewModel.updateModelName(it) },
+                    onThinkModeChanged = { viewModel.updateThinkMode(it) },
                     onOpenSettingsClick = this::openAccessibilitySettings
                 )
             }
@@ -85,6 +86,7 @@ fun MyApp(
     settings: com.milikovv.linguacontext.utils.Settings,
     onBaseUrlChanged: (String) -> Unit,
     onModelNameChanged: (String) -> Unit,
+    onThinkModeChanged: (Boolean) -> Unit,
     onOpenSettingsClick: () -> Unit
 ) {
     val navController = rememberNavController()
@@ -93,6 +95,7 @@ fun MyApp(
         navController = navController,
         onBaseUrlChanged = onBaseUrlChanged,
         onModelNameChanged = onModelNameChanged,
+        onThinkModeChanged = onThinkModeChanged,
         onOpenSettingsClick = onOpenSettingsClick
     )
 }
@@ -104,6 +107,7 @@ fun AppNavHost(
     navController: NavHostController,
     onBaseUrlChanged: (String) -> Unit,
     onModelNameChanged: (String) -> Unit,
+    onThinkModeChanged: (Boolean) -> Unit,
     onOpenSettingsClick: () -> Unit
 ) {
     NavHost(
@@ -130,6 +134,7 @@ fun AppNavHost(
                 settings,
                 onBaseUrlChanged = onBaseUrlChanged,
                 onModelNameChanged = onModelNameChanged,
+                onThinkModeChanged = onThinkModeChanged,
                 onBack = { navController.popBackStack() }
             )
         }

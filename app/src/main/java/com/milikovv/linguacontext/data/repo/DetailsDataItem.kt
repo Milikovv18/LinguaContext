@@ -17,7 +17,10 @@ data class WordDetail(
  * Details of selected word's meaning.
  */
 data class ExplanationDetail(
-    val text: String
+    val thinkingText: String,
+    val answerText: String,
+    val time: Long,
+    val isThinking: Boolean
 ) : IDetailDataItem
 
 /**
