@@ -4,6 +4,7 @@ androidDocumentationPlugin = "2.0.0"
 animation = "1.8.3"
 coilCompose = "3.2.0"
 converterGson = "2.5.0"
+core = "1.37.0"
 datastorePreferences = "1.1.7"
 gson = "2.13.1"
 hiltAndroid = "2.56.2"
@@ -18,6 +19,7 @@ activityCompose = "1.8.0"
 composeBom = "2024.09.00"
 mockwebserver3 = "5.0.0-alpha.2"
 navigationCompose = "2.9.0"
+rebugger = "1.0.0-rc03"
 retrofit = "2.9.0"
 textRecognition = "16.0.1"
 
@@ -31,6 +33,7 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 coil-gif = { module = "io.coil-kt.coil3:coil-gif", version.ref = "coilCompose" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
+core = { module = "com.composables:core", version.ref = "core" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }
@@ -50,6 +53,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesPlayServices" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version = "1.10.2" }
 mockwebserver3 = { module = "com.squareup.okhttp3:mockwebserver3", version.ref = "mockwebserver3" }
+rebugger = { module = "io.github.theapache64:rebugger", version.ref = "rebugger" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 text-recognition = { module = "com.google.mlkit:text-recognition", version.ref = "textRecognition" }
 

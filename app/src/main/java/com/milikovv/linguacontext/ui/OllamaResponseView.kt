@@ -34,6 +34,7 @@ import com.milikovv.linguacontext.data.repo.ExplanationDetail
 @Composable
 fun OllamaResponseView(
     item: ExplanationDetail,
+    isLoading: Boolean,
     onSkipThink: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -75,7 +76,7 @@ fun OllamaResponseView(
         // Reveal text below button, animates size change smoothly
         if (expanded)
             ThinkableText(item.thinkingText)
-        AnswerText(item.answerText)
+        AnswerText(item.answerText, isLoading)
     }
 }
 
@@ -145,9 +146,18 @@ fun ThinkableText(thinkText: String) {
 }
 
 @Composable
-fun AnswerText(answer: String) {
+fun AnswerText(answer: String, isLoading: Boolean) {
+    val text = if (answer.isNotBlank()) {
+        if (isLoading)
+            "$answer •"
+        else
+            answer
+    }
+    else
+        ""
+
     Text(
-        text = if (answer.isNotBlank()) "$answer •" else "",
+        text = text.trim(),
         modifier = Modifier
             .fillMaxWidth()
             .animateContentSize(),
