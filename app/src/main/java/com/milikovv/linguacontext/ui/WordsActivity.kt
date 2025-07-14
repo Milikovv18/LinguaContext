@@ -19,8 +19,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -31,7 +29,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.translate
@@ -40,7 +37,8 @@ import androidx.compose.ui.unit.IntSize
 import com.milikovv.linguacontext.data.repo.DetailsState
 import com.milikovv.linguacontext.data.repo.SingleWordData
 import com.milikovv.linguacontext.ui.theme.LinguaContextTheme
-import kotlinx.coroutines.launch
+import com.composables.core.rememberModalBottomSheetState
+import com.composables.core.SheetDetent
 
 /**
  * Transparent-like activity that acts like overlay and highlights words to easily identify
@@ -56,6 +54,7 @@ class WordsActivity : ComponentActivity() {
         setContent {
             LinguaContextTheme {
                 val wordsState by viewModel.serviceState.collectAsState()
+                val detailsState by viewModel.detailsState.collectAsState()
 
                 // Skipping composition until data is available
                 val data = wordsState.data
@@ -74,7 +73,7 @@ class WordsActivity : ComponentActivity() {
                         image = image,
                         words = words,
                         selectedWord = selected,
-                        detailsState = viewModel.detailsState.collectAsState().value,
+                        detailsState = detailsState,
                         onWordSelected = {
                             viewModel.selectWord(it)
                             viewModel.requestAnalysis()
@@ -82,6 +81,9 @@ class WordsActivity : ComponentActivity() {
                         onDismissSheet = {
                             viewModel.selectWord(null)
                             viewModel.stopAnalysis()
+                        },
+                        onSkipThink = {
+                            viewModel.skipThinking()
                         }
                     )
                 }
@@ -140,27 +142,27 @@ fun MainScreen(
     selectedWord: SingleWordData?,
     detailsState: DetailsState,
     onWordSelected: (SingleWordData) -> Unit,
-    onDismissSheet: () -> Unit
+    onDismissSheet: () -> Unit,
+    onSkipThink: () -> Unit,
 ) {
-    val scope = rememberCoroutineScope()
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(
+        initialDetent = Half,  // start at half-expanded
+        detents = listOf(SheetDetent.Hidden, Peek, Half, Full90)
+    )
     var showSheet by remember { mutableStateOf(false) }
 
     // Safely get sheet offset; fallback to 0 if not available
-    val offsetPx = runCatching { sheetState.requireOffset().toInt() }.getOrDefault(0)
+    val offsetPx = runCatching { image.height - sheetState.offset.toInt() }.getOrDefault(0)
 
     // Control showing/hiding sheet when selectedWord changes
     LaunchedEffect(selectedWord) {
         if (selectedWord != null) {
             showSheet = true
-            scope.launch { sheetState.show() }
-        } else {
-            scope.launch { sheetState.hide() }
-            showSheet = false
+            sheetState.targetDetent = Half
         }
     }
 
-    val canvasOffset = if (selectedWord != null && offsetPx in 1..selectedWord.bbox.bottom) {
+    val canvasOffset = if (selectedWord != null && offsetPx in 1..(selectedWord.bbox.bottom+selectedWord.bbox.height())) {
         offsetPx - selectedWord.bbox.bottom - selectedWord.bbox.height()
     } else {
         -image.height
@@ -177,29 +179,29 @@ fun MainScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (showSheet) {
-            ModalBottomSheet(
-                onDismissRequest = {
+            BottomSheetStructure(
+                sheetState = sheetState,
+                detailData = detailsState.detailData,
+                isLoading = detailsState.isLoading,
+                error = detailsState.error,
+                onDismissSheet = {
                     onDismissSheet()
                     showSheet = false
                 },
-                sheetState = sheetState,
-            ) {
-                BottomSheetContent(
-                    detailsState.detailData,
-                    detailsState.isLoading,
-                    detailsState.error
-                )
-            }
+                onSkipThink = onSkipThink
+            )
         }
 
-        val rectOffset = if (selectedWord != null && offsetPx < selectedWord.bbox.bottom)
+        val rectOffset = if (selectedWord != null && offsetPx < (selectedWord.bbox.bottom+selectedWord.bbox.height()))
             canvasOffset - image.height
         else
             canvasOffset
 
+        val scale by remember { mutableStateOf(PointF(image.width.toFloat(), image.height.toFloat())) }
+
         RectanglesOverlay(
             modifier = Modifier.offset { IntOffset(0, rectOffset.toInt() + image.height) },
-            scale = PointF(image.width.toFloat(), image.height.toFloat()),
+            scale = scale,
             words = words,
             selectedWord = selectedWord,
             isLoading = detailsState.isLoading,

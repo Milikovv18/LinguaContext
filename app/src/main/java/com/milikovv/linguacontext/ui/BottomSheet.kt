@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,8 +32,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.composables.core.DragIndication
+import com.composables.core.ModalBottomSheet
+import com.composables.core.ModalBottomSheetState
+import com.composables.core.Sheet
+import com.composables.core.SheetDetent
 import com.milikovv.linguacontext.R
 import com.milikovv.linguacontext.ui.theme.LinguaContextTheme
 
@@ -48,16 +55,6 @@ fun BottomHeader(item: WordDetail) {
         if (item.phonetic != null)
             Text(item.phonetic, style = MaterialTheme.typography.titleSmall, color = Color.LightGray)
     }
-}
-
-@Composable
-fun ExplanationText(item: ExplanationDetail) {
-    Text(
-        stringResource(R.string.explanation),
-        style = MaterialTheme.typography.titleSmall,
-        modifier = Modifier.padding(bottom = 8.dp)
-    )
-    Text(item.text, style = MaterialTheme.typography.bodySmall)
 }
 
 @Composable
@@ -99,10 +96,76 @@ fun FormalityBar(item: FormalityDetail) {
 }
 
 
+val Peek = SheetDetent(
+    identifier = "peek"
+) { containerHeight, sheetHeight ->
+    containerHeight * 0.2f  // At the very bottom
+}
+
+val Half = SheetDetent(
+    identifier = "half"
+) { containerHeight, sheetHeight ->
+    containerHeight * 0.6f  // 60% of the screen height
+}
+
+val Full90 = SheetDetent(
+    identifier = "full90"
+) { containerHeight, sheetHeight ->
+    containerHeight * 0.9f  // 90% of the screen height
+}
+
+
+@Composable
+fun BottomSheetStructure(
+    sheetState: ModalBottomSheetState,
+    detailData: List<IDetailDataItem>,
+    isLoading: Boolean,
+    error: String?,
+    onDismissSheet: () -> Unit,
+    onSkipThink: () -> Unit
+) {
+    ModalBottomSheet(
+        onDismiss = onDismissSheet,
+        state = sheetState
+    ) {
+        Sheet(modifier = Modifier.fillMaxWidth()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
+                    .background(Color.White)
+                    .height(1200.dp),  // content height
+                contentAlignment = Alignment.TopCenter
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    DragIndication(
+                        modifier = Modifier
+                            .padding(top = 22.dp)
+                            .background(Color.Black.copy(0.4f), RoundedCornerShape(100))
+                            .width(32.dp)
+                            .height(4.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
+                    BottomSheetContent(
+                        availItems = detailData,
+                        isLoading = isLoading,
+                        onSkipThink = onSkipThink,
+                        error = error
+                    )
+                }
+            }
+        }
+    }
+}
+
+
 @Composable
 fun BottomSheetContent(
     availItems: List<IDetailDataItem>,
     isLoading: Boolean,
+    onSkipThink: () -> Unit,
     error: String? = null
 ) {
     Column(modifier = Modifier
@@ -115,7 +178,7 @@ fun BottomSheetContent(
                 items(availItems) { item ->
                     when (item) {
                         is WordDetail -> BottomHeader(item)
-                        is ExplanationDetail -> ExplanationText(item)
+                        is ExplanationDetail -> OllamaResponseView(item, isLoading, onSkipThink)
                         is FormalityDetail -> FormalityBar(item)
                     }
                 }
@@ -141,8 +204,8 @@ fun BottomSheetPreview() {
     LinguaContextTheme {
         BottomSheetContent(listOf(
             WordDetail("Hello", "hello"),
-            ExplanationDetail("Kinda long explanation here just for multiline content. Kinda long explanation here just for multiline content"),
+            ExplanationDetail("Kinda long explanation here just for multiline content. Kinda long explanation here just for multiline content", "", 0L, false),
             FormalityDetail(0.5f)
-        ), false)
+        ), false, {})
     }
 }

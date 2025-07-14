@@ -61,6 +61,8 @@ dependencies {
     implementation(libs.coil.gif)
     implementation(libs.androidx.navigation.compose)
 
+    implementation(libs.core)
+
     // OCR
     implementation(libs.text.recognition)
 
@@ -75,6 +77,9 @@ dependencies {
 
     // Datastore
     implementation(libs.androidx.datastore.preferences)
+
+    // Debugging
+    implementation(libs.rebugger)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

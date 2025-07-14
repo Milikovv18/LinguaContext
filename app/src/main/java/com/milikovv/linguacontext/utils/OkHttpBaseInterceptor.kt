@@ -1,13 +1,11 @@
 package com.milikovv.linguacontext.utils
 
-import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import okhttp3.HttpUrl
 import okhttp3.Interceptor
 import okhttp3.Response
-import okhttp3.ResponseBody
 
 /**
  * OkHttp based interceptor to substitute base URL at runtime.
@@ -56,13 +54,6 @@ class OkHttpBaseUrlInterceptor(
             .url(newUrl)
             .build()
 
-        val response = chain.proceed(newRequest)
-        val rawJson = response.body()!!.string()
-        Log.d("RawJsonResponse", rawJson)
-
-        // Re-create response before returning because body can be read only once
-        return response.newBuilder()
-            .body(ResponseBody.create(response.body()!!.contentType(), rawJson))
-            .build()
+        return chain.proceed(newRequest)
     }
 }

@@ -21,7 +21,7 @@ class MockRemoteDataSource @Inject constructor() : RemoteDataSource {
         return flow {
             emit(WordDetail(selectedWord.word, selectedWord.word))
             kotlinx.coroutines.delay(1.seconds)
-            emit(ExplanationDetail("A large text with context word translation and explanation"))
+            emit(ExplanationDetail("A large text with context word translation and explanation", "", 0L, false))
             kotlinx.coroutines.delay(1.seconds)
             emit(FormalityDetail(0.7f))
         }

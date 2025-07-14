@@ -1,7 +1,5 @@
 package com.milikovv.linguacontext.di
 
-import com.google.gson.Gson
-import com.google.gson.Strictness
 import com.milikovv.linguacontext.data.remote.DictService
 import com.milikovv.linguacontext.data.remote.OllamaService
 import com.milikovv.linguacontext.data.remote.RemoteRestfullDataSource
@@ -32,7 +30,7 @@ import javax.inject.Singleton
 object RemoteRestfulDataSourceModule {
     @Provides
     @Singleton
-    fun provideDataSource(@DebugBaseUrl ollamaBase: Flow<Settings>): RemoteRestfullDataSource {
+    fun provideDataSource(ollamaBase: Flow<Settings>): RemoteRestfullDataSource {
         val baseUrlInterceptor = OkHttpBaseUrlInterceptor(ollamaBase.map{ it.baseUrl }.filterNotNull())
         baseUrlInterceptor.monitorUpdates(CoroutineScope(SupervisorJob() + Dispatchers.Default))
 
@@ -41,10 +39,6 @@ object RemoteRestfulDataSourceModule {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(DictService::class.java)
-
-        fun createGson(): Gson {
-            return Gson().newBuilder().setStrictness(Strictness.LENIENT).create()
-        }
 
         val ollamaService: OllamaService = Retrofit.Builder()
             .client(OkHttpClient.Builder()
@@ -55,15 +49,11 @@ object RemoteRestfulDataSourceModule {
                 .callTimeout(0, TimeUnit.MILLISECONDS)
                 .build())
             .baseUrl("http://dummy")
-            .addConverterFactory(GsonConverterFactory.create(createGson()))
+            .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(OllamaService::class.java)
 
-        val dataSource = RemoteRestfullDataSource(
-            dictService,
-            ollamaService,
-            ollamaBase.map { it.modelName }
-        )
+        val dataSource = RemoteRestfullDataSource(dictService, ollamaService, ollamaBase)
         dataSource.monitorUpdates(CoroutineScope(SupervisorJob() + Dispatchers.Default))
         return dataSource
     }

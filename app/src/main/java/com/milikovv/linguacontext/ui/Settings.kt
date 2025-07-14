@@ -6,7 +6,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,15 +25,10 @@ fun SettingsScreen(
     settings: Settings,
     onBaseUrlChanged: (String) -> Unit,
     onModelNameChanged: (String) -> Unit,
+    onThinkModeChanged: (Boolean) -> Unit,
     onBack: () -> Unit
 ) {
-    var baseUrlField by remember { mutableStateOf(settings.baseUrl) }
-    var modelNameField by remember { mutableStateOf(settings.modelName) }
-
     val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
-
-    val keyboardController = LocalSoftwareKeyboardController.current
 
     Scaffold(
         snackbarHost = {
@@ -55,62 +53,105 @@ fun SettingsScreen(
                     .fillMaxSize()
                     .padding(vertical = padding.calculateTopPadding() + 16.dp, horizontal = 16.dp)
             ) {
-                // Label + Rounded OutlinedTextField 1
-                Text(
-                    text = stringResource(R.string.ip_port),
-                    style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
-                val baseUrlUpdated = stringResource(id = R.string.base_url_updated)
-                OutlinedTextField(
-                    value = baseUrlField,
-                    singleLine = true,
-                    onValueChange = { baseUrlField = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            onBaseUrlChanged(baseUrlField)
-                            keyboardController?.hide()
-                            scope.launch {
-                                snackbarHostState.showSnackbar(
-                                    message = baseUrlUpdated,
-                                    duration = SnackbarDuration.Short
-                                )
-                            }
-                        }
-                    )
+                TextInputField(
+                    text = settings.baseUrl,
+                    header = stringResource(R.string.ip_port),
+                    snackbarText = stringResource(id = R.string.base_url_updated),
+                    onTextEdited = onBaseUrlChanged,
+                    snackbarHostState = snackbarHostState,
                 )
 
-                // Label + Rounded OutlinedTextField 3
-                Text(
-                    text = stringResource(R.string.llm_model),
-                    style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier.padding(bottom = 4.dp)
+                TextInputField(
+                    text = settings.modelName,
+                    header = stringResource(R.string.llm_model),
+                    snackbarText = stringResource(id = R.string.model_name_updated),
+                    onTextEdited = onModelNameChanged,
+                    snackbarHostState = snackbarHostState
                 )
-                val modelNameUpdated = stringResource(id = R.string.model_name_updated)
-                OutlinedTextField(
-                    value = modelNameField,
-                    singleLine = true,
-                    onValueChange = { modelNameField = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            onModelNameChanged(modelNameField)
-                            keyboardController?.hide()
-                            scope.launch {
-                                snackbarHostState.showSnackbar(
-                                    message = modelNameUpdated,
-                                    duration = SnackbarDuration.Short
-                                )
-                            }
-                        }
-                    )
+
+                ToggleField(
+                    settingName = "No think",
+                    description = "Disable thinking for LLM if supported",
+                    checked = settings.thinkDisable,
+                    onCheckedChange = onThinkModeChanged
                 )
             }
         }
     )
+}
+
+@Composable
+fun TextInputField(
+    text: String,
+    header: String,
+    snackbarText: String,
+    onTextEdited: (String) -> Unit,
+    snackbarHostState: SnackbarHostState
+) {
+    var textField by remember { mutableStateOf(text) }
+    val scope = rememberCoroutineScope()
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    Text(
+        text = header,
+        style = MaterialTheme.typography.bodyLarge,
+        modifier = Modifier.padding(bottom = 4.dp)
+    )
+
+    val baseUrlUpdated = snackbarText
+    OutlinedTextField(
+        value = textField,
+        singleLine = true,
+        onValueChange = { textField = it },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                onTextEdited(textField)
+                keyboardController?.hide()
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = baseUrlUpdated,
+                        duration = SnackbarDuration.Short
+                    )
+                }
+            }
+        )
+    )
+}
+
+@Composable
+fun ToggleField(
+    settingName: String,
+    description: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 4.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                text = settingName,
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray // Optional: use a less prominent color
+            )
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange
+        )
+    }
 }
 
 
@@ -118,7 +159,7 @@ fun SettingsScreen(
 @Composable
 fun SettingsPreview() {
     LinguaContextTheme {
-        SettingsScreen(Settings(), {}, {}, {})
+        SettingsScreen(Settings(), {}, {}, {}, {})
     }
 }
 
